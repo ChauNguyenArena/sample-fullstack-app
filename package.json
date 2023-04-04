@@ -1,0 +1,14 @@
+{
+  "name": "sample-fullstack-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install_depend": "cd backend/ && yarn && cd ../frontend/ && yarn",
+    "remove_depend": "cd backend/ && rm -rf node_modules yarn.lock package-lock.json && cd ../frontend/ && rm -rf node_modules yarn.lock package-lock.json",
+    "start:backend": "cd backend/ && yarn start",
+    "start:frontend": "cd frontend/ && yarn start"
+  },
+  "engines": {
+    "node": ">=16.x.x"
+  }
+}
