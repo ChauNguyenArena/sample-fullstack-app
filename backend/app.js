@@ -13,6 +13,8 @@ import indexRouter from './src/routes/index.js'
 import countryRouter from './src/routes/country.js'
 import userRouter from './src/routes/user.js'
 import customerRouter from './src/routes/customer.js'
+import vendorRouter from './src/routes/vendor.js'
+import productRouter from './src/routes/product.js'
 import uploadRouter from './src/routes/upload.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -45,6 +47,8 @@ app.use('/', indexRouter)
 app.use('/api/countries', countryRouter)
 app.use('/api/users', userRouter)
 app.use('/api/customers', customerRouter)
+app.use('/api/vendor', vendorRouter)
+app.use('/api/product', productRouter)
 app.use('/api/uploads', uploadRouter)
 
 app.get('/*', function (req, res) {
