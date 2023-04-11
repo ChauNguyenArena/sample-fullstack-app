@@ -47,8 +47,8 @@ app.use('/', indexRouter)
 app.use('/api/countries', countryRouter)
 app.use('/api/users', userRouter)
 app.use('/api/customers', customerRouter)
-app.use('/api/vendor', vendorRouter)
-app.use('/api/product', productRouter)
+app.use('/api/vendors', vendorRouter)
+app.use('/api/products', productRouter)
 app.use('/api/uploads', uploadRouter)
 
 app.get('/*', function (req, res) {

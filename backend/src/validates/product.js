@@ -20,7 +20,7 @@ export default {
       Array.from([
         'title',
         'description',
-        'handle',
+        // 'handle',
         'price',
         'publish',
         'status',

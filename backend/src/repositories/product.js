@@ -69,7 +69,7 @@ const find = async ({ page, limit, where, search, vendor, status, publish }) => 
     _where = { ..._where, vendorId: vendor }
   }
 
-  if ('' + status === 'ACTIVE' || '' + status === 'ARCHIVED' || '' + status === 'DRAFT') {
+  if (status) {
     _where = { ..._where, status }
   }
 
