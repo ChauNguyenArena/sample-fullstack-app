@@ -16,6 +16,9 @@ function App(props) {
     if (!props.countries?.length) {
       actions.getCountries()
     }
+    if (!props.vendors?.length) {
+      actions.getVendors()
+    }
   }, [])
 
   const toastMarkup = notify?.show && (

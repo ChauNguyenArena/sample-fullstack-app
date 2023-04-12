@@ -8,6 +8,8 @@ import Customer from './pages/Customers'
 import CustomerNew from './pages/Customers/new'
 import CustomerDetail from './pages/Customers/[id]'
 
+import Vendor from './pages/Vendors'
+
 export default [
   {
     path: '/',
@@ -59,5 +61,12 @@ export default [
         childrens: [],
       },
     ],
+  },
+  {
+    path: '/vendors',
+    title: 'Vendors',
+    exact: true,
+    component: Vendor,
+    childrens: [],
   },
 ]

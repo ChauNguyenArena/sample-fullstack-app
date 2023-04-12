@@ -78,9 +78,11 @@ function CreateForm(props) {
       if (created.id) {
         // update
         res = await CountryApi.update(created.id, data)
+        actions.getCountries()
       } else {
         // create
         res = await CountryApi.create(data)
+        actions.getCountries()
       }
       if (!res.success) throw res.error
 
