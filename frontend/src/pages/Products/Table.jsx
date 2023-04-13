@@ -1,3 +1,5 @@
+import React, { useState } from 'react'
+import PropTypes from 'prop-types'
 import {
   ActionList,
   Button,
@@ -7,35 +9,14 @@ import {
   Pagination,
   Popover,
   Select,
+  Thumbnail,
 } from '@shopify/polaris'
 import { MobileVerticalDotsMajor } from '@shopify/polaris-icons'
-import PropTypes from 'prop-types'
-import React, { useState } from 'react'
+import Image from '../../assets/images'
 import Search from './Search'
 import ConfirmModal from '../../components/ConfirmModal'
 
-Table.propsType = {
-  //... appProps,
-  data: PropTypes.object,
-  onChangePage: PropTypes.func,
-  onChangeLimit: PropTypes.func,
-  search: PropTypes.string,
-  onSearch: PropTypes.func,
-  onEdit: PropTypes.func,
-  onDelete: PropTypes.func,
-}
-
-Table.defaultProps = {
-  data: null,
-  onEdit: () => null,
-  onDelete: () => null,
-  onChangePage: () => null,
-  onChangeLimit: () => null,
-  search: '',
-  onSearch: () => null,
-}
-
-function Table(props) {
+const Table = (props) => {
   const { actions, data, onChangePage, onChangeLimit, search, onSearch, onEdit, onDelete } = props
   const { items, page, limit, totalPages, totalItems } = data || {}
 
@@ -46,9 +27,23 @@ function Table(props) {
   if (items?.length > 0) {
     rows = items.map((item, index) => [
       (page - 1) * limit + index + 1,
-      <h3>
-        <p>{item.name}</p>
-      </h3>,
+      <LegacyStack spacing="tight" wrap={false}>
+        <Thumbnail
+          size="small"
+          source={item.thumbnail || Image.photo_placeholder}
+          alt={item.handle}
+        />
+        <div>
+          <h3>
+            <b>{item.title}</b>
+          </h3>
+          <p>
+            <i>{item.handle}</i>
+          </p>
+        </div>
+      </LegacyStack>,
+      <div>{item.vendor?.name || 'No name'}</div>,
+      <div>$ {item.price * 1000}</div>,
       <LegacyStack distribution="trailing">
         <Popover
           active={item.id === selected?.id}
@@ -88,8 +83,8 @@ function Table(props) {
 
       <LegacyCard>
         <DataTable
-          headings={['No.', 'Name', 'Actions']}
-          columnContentTypes={['text', 'text', 'numeric']}
+          headings={['No.', 'Product', 'Vendor', 'Price', 'Actions']}
+          columnContentTypes={['text', 'text', 'text', 'numeric', 'numeric']}
           rows={rows}
           footerContent={items ? (items?.length > 0 ? undefined : 'Have no data') : 'loading..'}
         />
@@ -132,6 +127,27 @@ function Table(props) {
       )}
     </LegacyStack>
   )
+}
+
+Table.propTypes = {
+  // ...appProps,
+  data: PropTypes.object,
+  onChangePage: PropTypes.func,
+  onChangeLimit: PropTypes.func,
+  search: PropTypes.string,
+  onSearch: PropTypes.func,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func,
+}
+
+Table.defaultProps = {
+  data: null,
+  onEdit: () => null,
+  onDelete: () => null,
+  onChangePage: () => null,
+  onChangeLimit: () => null,
+  search: '',
+  onSearch: () => null,
 }
 
 export default Table

@@ -9,6 +9,12 @@ import CustomerNew from './pages/Customers/new'
 import CustomerDetail from './pages/Customers/[id]'
 
 import Vendor from './pages/Vendors'
+import VendorNew from './pages/Vendors/new'
+import VendorDetail from './pages/Vendors/[id]'
+
+import Product from './pages/Products'
+import ProductNew from './pages/Products/new'
+import ProductDetail from './pages/Products/[id]'
 
 export default [
   {
@@ -67,6 +73,43 @@ export default [
     title: 'Vendors',
     exact: true,
     component: Vendor,
-    childrens: [],
+    childrens: [
+      {
+        path: '/vendors/new',
+        title: 'New Vendor',
+        exact: true,
+        component: VendorNew,
+        childrens: [],
+      },
+      {
+        path: '/vendors/:id',
+        title: 'Edit Vendor',
+        exact: true,
+        component: VendorDetail,
+        childrens: [],
+      },
+    ],
+  },
+  {
+    path: '/products',
+    title: 'Products',
+    exact: true,
+    component: Product,
+    childrens: [
+      {
+        path: '/products/new',
+        title: 'Products Vendor',
+        exact: true,
+        component: ProductNew,
+        childrens: [],
+      },
+      {
+        path: '/products/:id',
+        title: 'Edit Product',
+        exact: true,
+        component: ProductDetail,
+        childrens: [],
+      },
+    ],
   },
 ]

@@ -1,17 +1,16 @@
+import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
-import { Button, LegacyCard, LegacyStack } from '@shopify/polaris'
-import { useEffect, useState } from 'react'
+import VendorApi from '../../apis/vendor.js'
 import ValidateForm from '../../helpers/validateForm'
+import { Button, LegacyCard, LegacyStack } from '@shopify/polaris'
 import FormControl from '../../components/FormControl'
-import CountryApi from '../../apis/country'
 
 CreateForm.propTypes = {
-  // ...appProps,
   created: PropTypes.object,
 }
 
 CreateForm.defaultProps = {
-  created: {},
+  create: {},
 }
 
 const InitFormData = {
@@ -34,9 +33,7 @@ const InitFormData = {
 
 function CreateForm(props) {
   const { actions, created } = props
-
   const [formData, setFormData] = useState(null)
-
   useEffect(() => console.log('formData :>> ', formData), [formData])
 
   useEffect(() => {
@@ -57,7 +54,7 @@ function CreateForm(props) {
     setFormData(_formData)
   }
 
-  const handleDiscard = () => props.navigate('countries')
+  const handleDiscard = () => props.navigate('vendors')
 
   const handleSubmit = async () => {
     try {
@@ -69,26 +66,24 @@ function CreateForm(props) {
 
       actions.showAppLoading()
 
-      let data = {
-        name: validFormData.name.value,
-      }
+      let data = { name: validFormData.name.value }
+
       console.log('data :>> ', data)
 
       let res = null
       if (created.id) {
-        // update
-        res = await CountryApi.update(created.id, data)
+        res = await VendorApi.update(created.id, data)
       } else {
-        // create
-        res = await CountryApi.create(data)
+        res = await VendorApi.create(data)
       }
 
       if (!res.success) throw res.error
-      actions.getCountries()
+      actions.getVendors()
 
       actions.showNotify({ message: created.id ? 'Saved' : 'Created' })
 
-      props.navigate(`countries/${res.data.id}`)
+      // props.navigate(`vendors/${res.data.id}`)
+      props.navigate(`vendors`)
     } catch (error) {
       console.log(error)
       actions.showNotify({ error: true, message: error.message })
@@ -98,7 +93,6 @@ function CreateForm(props) {
   }
 
   if (!formData) return null
-
   return (
     <LegacyStack vertical alignment="fill">
       <LegacyCard sectioned>

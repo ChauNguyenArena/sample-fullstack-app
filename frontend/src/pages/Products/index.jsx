@@ -1,24 +1,27 @@
-import { LegacyStack } from '@shopify/polaris'
 import React, { useEffect, useState } from 'react'
-import Header from '../../components/Header'
 import qs from 'query-string'
-import VendorApi from '../../apis/vendor'
+import ProductApi from '../../apis/product'
+import { useSearchParams } from 'react-router-dom'
+import { LegacyStack } from '@shopify/polaris'
+import Header from '../../components/Header'
 import Table from './Table'
-// import Table from './Table'
 
 const IndexPage = (props) => {
   const { actions } = props
 
+  const [searchParams, setSearchParams] = useSearchParams()
+
   const { page, limit, search } = qs.parse(props.location.search)
 
-  const [vendors, setVendors] = useState(null)
+  const [products, setProducts] = useState(null)
 
-  const getVendors = async ({ page = 1, limit = 10, search = '' }) => {
+  const getProducts = async ({ page = 1, limit = 10, search = '' }) => {
     try {
       let query = qs.stringify({ page, limit, search })
-      let res = await VendorApi.find(query)
+      let res = await ProductApi.find(query)
       if (!res.success) throw res.error
-      setVendors(res.data)
+      setProducts(res.data)
+      setSearchParams(query)
     } catch (error) {
       console.log(error)
       actions.showNotify({ message: error.message, error: true })
@@ -26,20 +29,18 @@ const IndexPage = (props) => {
   }
 
   useEffect(() => {
-    getVendors({ page, limit, search })
+    getProducts({ page, limit, search })
   }, [])
 
   const handleDelete = async (deleted) => {
-    console.log('run delete')
     try {
       actions.showAppLoading()
 
-      let res = await VendorApi.delete(deleted.id)
+      let res = await ProductApi.delete(deleted.id)
       if (!res.success) throw res.error
 
       actions.showNotify({ message: 'Deleted' })
-
-      getVendors({ page, limit, search })
+      getProducts({ page, limit, search })
     } catch (error) {
       console.log(error)
       actions.showNotify({ message: error.message, error: true })
@@ -47,15 +48,14 @@ const IndexPage = (props) => {
       actions.hideAppLoading()
     }
   }
-
   return (
     <LegacyStack vertical alignment="fill">
       <Header
-        title="Vendor"
+        title="Products"
         actions={[
           {
-            label: 'Add new vendor',
-            onClick: () => props.navigate('/vendors/new'),
+            label: 'Add new product',
+            onClick: () => props.navigate('/products/new'),
             primary: true,
           },
         ]}
@@ -63,12 +63,12 @@ const IndexPage = (props) => {
 
       <Table
         {...props}
-        data={vendors}
-        onChangePage={(page) => getVendors({ page, limit, search })}
-        onChangeLimit={(limit) => getVendors({ page: 1, limit, search })}
+        data={products}
+        onChangePage={(page) => getProducts({ page, limit, search })}
+        onChangeLimit={(limit) => getProducts({ page: 1, limit, search })}
         search={search}
-        onSearch={(search) => getVendors({ page: 1, limit, search })}
-        onEdit={(item) => props.navigate(`vendors/${item.id}`)}
+        onSearch={(search) => getProducts({ page: 1, limit, search })}
+        onEdit={(item) => props.navigate(`products/${item.id}`)}
         onDelete={handleDelete}
       />
     </LegacyStack>

@@ -45,7 +45,7 @@ function Table(props) {
 
   const [selected, setSelected] = useState(null)
   const [deleted, setDeleted] = useState(null)
-
+  console.log('data>>', data)
   let rows = []
   if (items?.length > 0) {
     rows = items.map((item, index) => [
