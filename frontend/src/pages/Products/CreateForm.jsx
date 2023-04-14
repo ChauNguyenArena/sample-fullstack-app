@@ -4,6 +4,7 @@ import ValidateForm from '../../helpers/validateForm'
 import ProductApi from '../../apis/product'
 import { Button, LegacyCard, LegacyStack } from '@shopify/polaris'
 import FormControl from '../../components/FormControl'
+import generateSlug from '../../helpers/generateSlug'
 
 const InitFormData = {
   title: {
@@ -21,21 +22,21 @@ const InitFormData = {
     },
     focused: true,
   },
-  // handle: {
-  //   name: 'handle',
-  //   type: 'text',
-  //   label: 'Handle',
-  //   value: '',
-  //   error: '',
-  //   require: true,
-  //   validate: {
-  //     trim: true,
-  //     require: [true, 'Required!'],
-  //     minlength: [2, 'Too short!'],
-  //     maxlength: [200, 'Too long!'],
-  //   },
-  //   focused: true,
-  // },
+  handle: {
+    name: 'handle',
+    type: 'text',
+    label: 'Handle',
+    value: '',
+    error: '',
+    required: true,
+    validate: {
+      trim: true,
+      require: [true, 'Required!'],
+      minlength: [2, 'Too short!'],
+      maxlength: [200, 'Too long!'],
+    },
+    focused: true,
+  },
   description: {
     name: 'title',
     type: 'text',
@@ -103,7 +104,7 @@ function CreateForm(props) {
     let _formData = JSON.parse(JSON.stringify(InitFormData))
 
     if (created.id) {
-      Array.from(['title', 'description', 'price']).forEach(
+      Array.from(['title', 'description', 'handle', 'price']).forEach(
         (field) => (_formData[field] = { ..._formData[field], value: created[field] || '' })
       )
       Array.from(['publish']).forEach(
@@ -119,7 +120,7 @@ function CreateForm(props) {
       // example data
       _formData['title'].value = 'Sample product'
       _formData['description'].value = 'Sample product, etc,...'
-      // _formData['handle'].value = 'sample-product'
+      _formData['handle'].value = 'sample-product'
       _formData['price'].value = 0
     }
 
@@ -129,6 +130,8 @@ function CreateForm(props) {
   const handleChange = (name, value) => {
     let _formData = JSON.parse(JSON.stringify(formData))
     _formData[name] = { ..._formData[name], value, error: '' }
+    if (name === 'title')
+      _formData['handle'] = { ..._formData['handle'], value: generateSlug(value), error: '' }
     setFormData(_formData)
   }
 
@@ -146,7 +149,7 @@ function CreateForm(props) {
 
       let data = {
         title: validFormData.title.value,
-        // handle: validFormData.handle.value,
+        handle: validFormData.handle.value,
         description: validFormData.description.value,
         price: validFormData.price.value,
         publish: validFormData.publish.value || undefined,
@@ -199,10 +202,10 @@ function CreateForm(props) {
               />
             </LegacyStack.Item>
             <LegacyStack.Item fill>
-              {/* <FormControl
+              <FormControl
                 {...formData['handle']}
                 onChange={(value) => handleChange('handle', value)}
-              /> */}
+              />
             </LegacyStack.Item>
           </LegacyStack>
 
