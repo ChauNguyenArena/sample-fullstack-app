@@ -43,7 +43,7 @@ const Table = (props) => {
         </div>
       </LegacyStack>,
       <div>{item.vendor?.name || 'No name'}</div>,
-      <div>$ {item.price * 1000}</div>,
+      <div>$ {item.price}</div>,
       <LegacyStack distribution="trailing">
         <Popover
           active={item.id === selected?.id}

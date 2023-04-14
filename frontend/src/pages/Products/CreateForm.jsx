@@ -12,7 +12,7 @@ const InitFormData = {
     label: 'Title',
     value: '',
     error: '',
-    require: true,
+    required: true,
     validate: {
       trim: true,
       require: [true, 'Required!'],
@@ -21,28 +21,28 @@ const InitFormData = {
     },
     focused: true,
   },
-  handle: {
-    name: 'handle',
-    type: 'text',
-    label: 'Handle',
-    value: '',
-    error: '',
-    require: true,
-    validate: {
-      trim: true,
-      require: [true, 'Required!'],
-      minlength: [2, 'Too short!'],
-      maxlength: [200, 'Too long!'],
-    },
-    focused: true,
-  },
+  // handle: {
+  //   name: 'handle',
+  //   type: 'text',
+  //   label: 'Handle',
+  //   value: '',
+  //   error: '',
+  //   require: true,
+  //   validate: {
+  //     trim: true,
+  //     require: [true, 'Required!'],
+  //     minlength: [2, 'Too short!'],
+  //     maxlength: [200, 'Too long!'],
+  //   },
+  //   focused: true,
+  // },
   description: {
     name: 'title',
     type: 'text',
     label: 'Description',
     value: '',
     error: '',
-    require: true,
+    required: true,
     validate: {
       trim: true,
       require: [true, 'Required!'],
@@ -54,11 +54,10 @@ const InitFormData = {
     name: 'price',
     type: 'text',
     label: 'Price',
-    value: 0,
+    value: 1,
     error: '',
     required: false,
     required: false,
-    validate: {},
   },
   publish: {
     name: 'publish',
@@ -104,7 +103,7 @@ function CreateForm(props) {
     let _formData = JSON.parse(JSON.stringify(InitFormData))
 
     if (created.id) {
-      Array.from(['title', 'description', 'handle', 'price']).forEach(
+      Array.from(['title', 'description', 'price']).forEach(
         (field) => (_formData[field] = { ..._formData[field], value: created[field] || '' })
       )
       Array.from(['publish']).forEach(
@@ -120,8 +119,8 @@ function CreateForm(props) {
       // example data
       _formData['title'].value = 'Sample product'
       _formData['description'].value = 'Sample product, etc,...'
-      _formData['handle'].value = 'sample-product'
-      _formData['price'].value = '0'
+      // _formData['handle'].value = 'sample-product'
+      _formData['price'].value = 0
     }
 
     setFormData(_formData)
@@ -147,7 +146,7 @@ function CreateForm(props) {
 
       let data = {
         title: validFormData.title.value,
-        handle: validFormData.handle.value,
+        // handle: validFormData.handle.value,
         description: validFormData.description.value,
         price: validFormData.price.value,
         publish: validFormData.publish.value || undefined,
@@ -167,7 +166,7 @@ function CreateForm(props) {
       if (!res.success) throw res.error
 
       actions.showNotify({ message: created.id ? 'Saved' : 'Created' })
-
+      console.log(res.data.id)
       props.navigate(`products/${res.data.id}`)
     } catch (error) {
       console.log(error)
@@ -187,7 +186,7 @@ function CreateForm(props) {
   ]
 
   let vendorOptions = vendors.map((item) => ({ label: item.name, value: '' + item.id }))
-  vendorOptions.unshift({ label: 'Select a vendor', value: '' })
+  vendorOptions.unshift({ label: 'Select a vendor', value: null })
   return (
     <LegacyStack vertical alignment="fill">
       <LegacyCard sectioned>
@@ -200,10 +199,10 @@ function CreateForm(props) {
               />
             </LegacyStack.Item>
             <LegacyStack.Item fill>
-              <FormControl
+              {/* <FormControl
                 {...formData['handle']}
                 onChange={(value) => handleChange('handle', value)}
-              />
+              /> */}
             </LegacyStack.Item>
           </LegacyStack>
 
