@@ -95,7 +95,7 @@ const find = async ({ page, limit, where, search, vendor, status, publish }) => 
 }
 
 const create = async (data) => {
-  const created = await Model.create(data, include)
+  const created = await Model.create(data, { include })
 
   return created.toJSON()
 }
