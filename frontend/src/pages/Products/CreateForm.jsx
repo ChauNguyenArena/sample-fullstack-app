@@ -104,6 +104,17 @@ const InitFormData = {
     required: false,
     validate: {},
   },
+  images: {
+    name: 'images',
+    type: 'file',
+    label: 'Images',
+    value: null,
+    allowMultiple: true,
+    origin: [],
+    error: '',
+    required: false,
+    validate: {},
+  },
 }
 function CreateForm(props) {
   const { actions, created, vendors } = props
@@ -124,7 +135,7 @@ function CreateForm(props) {
       Array.from(['vendorId', 'status']).forEach(
         (field) => (_formData[field] = { ..._formData[field], value: String(created[field]) })
       )
-      Array.from(['thumbnail']).forEach(
+      Array.from(['thumbnail', 'images']).forEach(
         (field) => (_formData[field] = { ..._formData[field], origin: created[field] || null })
       )
     } else {
@@ -142,17 +153,25 @@ function CreateForm(props) {
     // let _formData = JSON.parse(JSON.stringify(formData))
     let _formData = { ...formData }
     _formData[name] = { ..._formData[name], value, error: '' }
+
     if (name === 'title')
       _formData['handle'] = { ..._formData['handle'], value: generateSlug(value), error: '' }
 
     if (name === 'thumbnail' && value !== null) {
-      let result = await UploadApi.uploadFiles(value)
+      let result = await UploadApi.uploadFiles([value])
+      console.log('upload>>>', result)
       _formData['thumbnail'] = {
         ..._formData['thumbnail'],
         value: result.data[0],
         origin: result.data[0].url,
       }
     }
+
+    if (name === 'images') {
+      let result = await UploadApi.uploadFiles(value)
+      console.log('upload>>>', result)
+    }
+
     setFormData(_formData)
   }
 
@@ -178,6 +197,7 @@ function CreateForm(props) {
         thumbnail: validFormData.thumbnail.origin || undefined,
         vendorId: validFormData.vendorId.value || undefined,
       }
+
       console.log('data :>> ', data)
 
       let res = null
@@ -291,6 +311,29 @@ function CreateForm(props) {
               <FormControl
                 {...formData['thumbnail']}
                 onChange={(value) => handleChange('thumbnail', value)}
+              />
+            </LegacyStack.Item>
+            <LegacyStack.Item fill></LegacyStack.Item>
+          </LegacyStack>
+
+          <LegacyStack distribution="fillEvenly">
+            <LegacyStack.Item fill>
+              {/* {formData['images'].origin && (
+                <img
+                  width="100"
+                  height="100"
+                  style={{
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                  }}
+                  src={formData['images'].origin}
+                />
+              )} */}
+            </LegacyStack.Item>
+            <LegacyStack.Item fill>
+              <FormControl
+                {...formData['images']}
+                onChange={(value) => handleChange('images', value)}
               />
             </LegacyStack.Item>
             <LegacyStack.Item fill></LegacyStack.Item>
