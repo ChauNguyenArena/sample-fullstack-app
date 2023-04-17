@@ -5,6 +5,7 @@ import ProductApi from '../../apis/product'
 import { Button, LegacyCard, LegacyStack } from '@shopify/polaris'
 import FormControl from '../../components/FormControl'
 import generateSlug from '../../helpers/generateSlug'
+import UploadApi from '../../apis/uploads'
 
 const InitFormData = {
   title: {
@@ -93,6 +94,16 @@ const InitFormData = {
     validate: {},
     options: [],
   },
+  thumbnail: {
+    name: 'thumbnail',
+    type: 'file',
+    label: 'Thumbnail',
+    value: null,
+    origin: '',
+    error: '',
+    required: false,
+    validate: {},
+  },
 }
 function CreateForm(props) {
   const { actions, created, vendors } = props
@@ -110,11 +121,11 @@ function CreateForm(props) {
       Array.from(['publish']).forEach(
         (field) => (_formData[field] = { ..._formData[field], value: Boolean(created[field]) })
       )
-      Array.from(['vendorId']).forEach(
+      Array.from(['vendorId', 'status']).forEach(
         (field) => (_formData[field] = { ..._formData[field], value: String(created[field]) })
       )
-      Array.from(['status']).forEach(
-        (field) => (_formData[field] = { ..._formData[field], value: String(created[field]) })
+      Array.from(['thumbnail']).forEach(
+        (field) => (_formData[field] = { ..._formData[field], origin: created[field] || null })
       )
     } else {
       // example data
@@ -127,11 +138,21 @@ function CreateForm(props) {
     setFormData(_formData)
   }, [])
 
-  const handleChange = (name, value) => {
-    let _formData = JSON.parse(JSON.stringify(formData))
+  const handleChange = async (name, value) => {
+    // let _formData = JSON.parse(JSON.stringify(formData))
+    let _formData = { ...formData }
     _formData[name] = { ..._formData[name], value, error: '' }
     if (name === 'title')
       _formData['handle'] = { ..._formData['handle'], value: generateSlug(value), error: '' }
+
+    if (name === 'thumbnail' && value !== null) {
+      let result = await UploadApi.uploadFiles(value)
+      _formData['thumbnail'] = {
+        ..._formData['thumbnail'],
+        value: result.data[0],
+        origin: result.data[0].url,
+      }
+    }
     setFormData(_formData)
   }
 
@@ -154,6 +175,7 @@ function CreateForm(props) {
         price: validFormData.price.value,
         publish: validFormData.publish.value || undefined,
         status: validFormData.status.value || undefined,
+        thumbnail: validFormData.thumbnail.origin || undefined,
         vendorId: validFormData.vendorId.value || undefined,
       }
       console.log('data :>> ', data)
@@ -249,6 +271,29 @@ function CreateForm(props) {
                 options={statusOptions}
               />
             </LegacyStack.Item>
+          </LegacyStack>
+
+          <LegacyStack distribution="fillEvenly">
+            <LegacyStack.Item fill>
+              {formData['thumbnail'].origin && (
+                <img
+                  width="100"
+                  height="100"
+                  style={{
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                  }}
+                  src={formData['thumbnail'].origin}
+                />
+              )}
+            </LegacyStack.Item>
+            <LegacyStack.Item fill>
+              <FormControl
+                {...formData['thumbnail']}
+                onChange={(value) => handleChange('thumbnail', value)}
+              />
+            </LegacyStack.Item>
+            <LegacyStack.Item fill></LegacyStack.Item>
           </LegacyStack>
         </LegacyStack>
       </LegacyCard>

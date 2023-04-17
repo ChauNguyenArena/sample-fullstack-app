@@ -18,7 +18,9 @@ function MyDropZoneSingle(props) {
 
   const [file, setFile] = useState(props.file)
 
-  useEffect(() => onChange(file), [file])
+  useEffect(() => {
+    onChange(file)
+  }, [file])
 
   const handleDropZoneDrop = useCallback(
     (_dropFiles, acceptedFiles, _rejectedFiles) => setFile((file) => acceptedFiles[0]),
