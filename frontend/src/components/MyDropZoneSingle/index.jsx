@@ -30,10 +30,11 @@ function MyDropZoneSingle(props) {
   const validImageTypes = ['image/gif', 'image/jpeg', 'image/png']
 
   const fileUpload = !file && <DropZone.FileUpload />
+  // const fileUpload = <DropZone.FileUpload />
   const uploadedFile = file && (
     <LegacyStack>
       <Thumbnail
-        size="small"
+        size="medium"
         alt={file.name}
         source={validImageTypes.includes(file.type) ? window.URL.createObjectURL(file) : NoteMinor}
       />
@@ -45,8 +46,10 @@ function MyDropZoneSingle(props) {
 
   return (
     <DropZone allowMultiple={false} onDrop={handleDropZoneDrop}>
-      {uploadedFile}
-      {fileUpload}
+      <div style={{ padding: 10 }}>
+        {uploadedFile}
+        {fileUpload}
+      </div>
     </DropZone>
   )
 }

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import ValidateForm from '../../helpers/validateForm'
 import ProductApi from '../../apis/product'
-import { Button, LegacyCard, LegacyStack } from '@shopify/polaris'
+import { Button, Checkbox, Icon, LegacyCard, LegacyStack } from '@shopify/polaris'
+import { CancelMajor } from '@shopify/polaris-icons'
 import FormControl from '../../components/FormControl'
 import generateSlug from '../../helpers/generateSlug'
 import UploadApi from '../../apis/uploads'
@@ -99,7 +100,7 @@ const InitFormData = {
     type: 'file',
     label: 'Thumbnail',
     value: null,
-    origin: '',
+    originalValue: '',
     error: '',
     required: false,
     validate: {},
@@ -110,7 +111,7 @@ const InitFormData = {
     label: 'Images',
     value: null,
     allowMultiple: true,
-    origin: [],
+    originalValue: [],
     error: '',
     required: false,
     validate: {},
@@ -119,6 +120,7 @@ const InitFormData = {
 function CreateForm(props) {
   const { actions, created, vendors } = props
   const [formData, setFormData] = useState(null)
+  const [selected, setSelected] = useState([])
 
   useEffect(() => console.log('formData :>> ', formData), [formData])
 
@@ -136,7 +138,8 @@ function CreateForm(props) {
         (field) => (_formData[field] = { ..._formData[field], value: String(created[field]) })
       )
       Array.from(['thumbnail', 'images']).forEach(
-        (field) => (_formData[field] = { ..._formData[field], origin: created[field] || null })
+        (field) =>
+          (_formData[field] = { ..._formData[field], originalValue: created[field] || null })
       )
     } else {
       // example data
@@ -159,20 +162,67 @@ function CreateForm(props) {
 
     if (name === 'thumbnail' && value !== null) {
       let result = await UploadApi.uploadFiles([value])
-      console.log('upload>>>', result)
       _formData['thumbnail'] = {
         ..._formData['thumbnail'],
         value: result.data[0],
-        origin: result.data[0].url,
+        originalValue: result.data[0].url,
       }
     }
 
     if (name === 'images') {
       let result = await UploadApi.uploadFiles(value)
-      console.log('upload>>>', result)
+      let listImage = []
+      result.data.forEach((image) => listImage.push(image.url))
+      _formData['images'] = {
+        ..._formData['images'],
+        value: result.data,
+        originalValue: _formData['images'].originalValue.concat(listImage),
+      }
     }
 
     setFormData(_formData)
+  }
+
+  const handleRemove = () => {
+    let _formData = { ...formData }
+
+    _formData['thumbnail'].originalValue = null
+
+    setFormData(_formData)
+  }
+
+  const handleRemoveInArray = (index) => {
+    let _formData = { ...formData }
+
+    _formData['images'].originalValue.splice(index, 1)
+
+    setFormData(_formData)
+  }
+
+  const handleMultipleSelect = (index) => {
+    let _filter = [...selected]
+    _filter = !_filter.includes(index)
+      ? [..._filter, index]
+      : _filter.filter((item) => item !== index)
+
+    setSelected(_filter)
+  }
+
+  const handleDelete = () => {
+    console.log('delete')
+    let _formData = { ...formData }
+    // console.log(_formData['images'].originalValue)
+    let forDeletion = []
+    selected.forEach((index) => {
+      forDeletion.push(_formData['images'].originalValue[index])
+    })
+
+    _formData['images'].originalValue = _formData['images'].originalValue.filter(
+      (item) => !forDeletion.includes(item)
+    )
+
+    setFormData(_formData)
+    setSelected([])
   }
 
   const handleDiscard = () => props.navigate('products')
@@ -194,7 +244,8 @@ function CreateForm(props) {
         price: validFormData.price.value,
         publish: validFormData.publish.value || undefined,
         status: validFormData.status.value || undefined,
-        thumbnail: validFormData.thumbnail.origin || undefined,
+        thumbnail: validFormData.thumbnail.originalValue,
+        images: validFormData.images.originalValue,
         vendorId: validFormData.vendorId.value || undefined,
       }
 
@@ -295,48 +346,113 @@ function CreateForm(props) {
 
           <LegacyStack distribution="fillEvenly">
             <LegacyStack.Item fill>
-              {formData['thumbnail'].origin && (
-                <img
-                  width="100"
-                  height="100"
-                  style={{
-                    objectFit: 'cover',
-                    objectPosition: 'center',
-                  }}
-                  src={formData['thumbnail'].origin}
-                />
-              )}
-            </LegacyStack.Item>
-            <LegacyStack.Item fill>
               <FormControl
                 {...formData['thumbnail']}
                 onChange={(value) => handleChange('thumbnail', value)}
               />
             </LegacyStack.Item>
-            <LegacyStack.Item fill></LegacyStack.Item>
+            <LegacyStack.Item fill>
+              {formData['thumbnail'].originalValue && (
+                <div style={{ position: 'relative', marginTop: '24px', width: '120px' }}>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: '13px',
+                      top: '5px',
+                      height: '10px',
+                      width: '10px',
+                    }}
+                    onClick={handleRemove}
+                  >
+                    <Icon source={CancelMajor} color="critical" backdrop size />
+                  </div>
+                  <img
+                    width="120px"
+                    height="120px"
+                    style={{
+                      objectFit: 'cover',
+                      objectPosition: 'center',
+                      borderRadius: '10px',
+                      border: 'dashed gray',
+                      borderWidth: '1px',
+                    }}
+                    src={formData['thumbnail'].originalValue}
+                  />
+                </div>
+              )}
+            </LegacyStack.Item>
           </LegacyStack>
 
-          <LegacyStack distribution="fillEvenly">
-            <LegacyStack.Item fill>
-              {/* {formData['images'].origin && (
-                <img
-                  width="100"
-                  height="100"
-                  style={{
-                    objectFit: 'cover',
-                    objectPosition: 'center',
-                  }}
-                  src={formData['images'].origin}
-                />
-              )} */}
-            </LegacyStack.Item>
+          <LegacyStack vertical distribution="fillEvenly">
             <LegacyStack.Item fill>
               <FormControl
                 {...formData['images']}
                 onChange={(value) => handleChange('images', value)}
               />
             </LegacyStack.Item>
-            <LegacyStack.Item fill></LegacyStack.Item>
+            <LegacyStack.Item fill>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  gap: '10px',
+                  padding: '10px',
+                  borderRadius: '10px',
+                  border: 'dashed gray',
+                  borderWidth: '1px',
+                }}
+              >
+                {formData['images'].originalValue.length > 0 ? (
+                  formData['images'].originalValue.map((image, index) => (
+                    <div
+                      key={index}
+                      style={{ position: 'relative', width: '60px', boxShadow: '1px 1px  #eeeeee' }}
+                    >
+                      <div
+                        id={index}
+                        style={{
+                          position: 'absolute',
+                          right: '10px',
+                          top: '0px',
+                          height: '10px',
+                          width: '10px',
+                        }}
+                      >
+                        <Checkbox
+                          checked={selected.includes(index)}
+                          onChange={() => handleMultipleSelect(index)}
+                        />
+                        {/* <Icon
+                          source={CancelMajor}
+                          color="critical"
+                          backdrop
+                          size
+                          onClick={() => handleRemoveInArray(index)}
+                        /> */}
+                      </div>
+
+                      <img
+                        width="60"
+                        height="60"
+                        style={{
+                          objectFit: 'cover',
+                          objectPosition: 'center',
+                        }}
+                        src={image}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <p>Empty</p>
+                )}
+              </div>
+            </LegacyStack.Item>
+            {selected.length > 0 && (
+              <LegacyStack.Item>
+                <Button onClick={handleDelete}>Delete</Button>
+              </LegacyStack.Item>
+            )}
           </LegacyStack>
         </LegacyStack>
       </LegacyCard>
