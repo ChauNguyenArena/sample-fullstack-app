@@ -2,11 +2,20 @@ import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import ValidateForm from '../../helpers/validateForm'
 import ProductApi from '../../apis/product'
-import { Button, Checkbox, Icon, LegacyCard, LegacyStack } from '@shopify/polaris'
-import { CancelMajor } from '@shopify/polaris-icons'
+import { Button, LegacyCard, LegacyStack } from '@shopify/polaris'
+
 import FormControl from '../../components/FormControl'
 import generateSlug from '../../helpers/generateSlug'
 import UploadApi from '../../apis/uploads'
+import ShowMultiple from './showMultiple'
+import ShowSingle from './showSingle'
+
+let statusOptions = [
+  { label: 'Select a vendor', value: '' },
+  { label: 'Active', value: 'ACTIVE' },
+  { label: 'Draft', value: 'DRAFT' },
+  { label: 'Archived', value: 'ARCHIVED' },
+]
 
 const InitFormData = {
   title: {
@@ -98,7 +107,7 @@ const InitFormData = {
   thumbnail: {
     name: 'thumbnail',
     type: 'file',
-    label: 'Thumbnail',
+    label: '',
     value: null,
     originalValue: '',
     error: '',
@@ -108,10 +117,11 @@ const InitFormData = {
   images: {
     name: 'images',
     type: 'file',
-    label: 'Images',
+    label: '',
     value: null,
     allowMultiple: true,
     originalValue: [],
+    removeValue: [],
     error: '',
     required: false,
     validate: {},
@@ -120,7 +130,6 @@ const InitFormData = {
 function CreateForm(props) {
   const { actions, created, vendors } = props
   const [formData, setFormData] = useState(null)
-  const [selected, setSelected] = useState([])
 
   useEffect(() => console.log('formData :>> ', formData), [formData])
 
@@ -153,7 +162,6 @@ function CreateForm(props) {
   }, [])
 
   const handleChange = async (name, value) => {
-    // let _formData = JSON.parse(JSON.stringify(formData))
     let _formData = { ...formData }
     _formData[name] = { ..._formData[name], value, error: '' }
 
@@ -199,30 +207,25 @@ function CreateForm(props) {
     setFormData(_formData)
   }
 
-  const handleMultipleSelect = (index) => {
-    let _filter = [...selected]
-    _filter = !_filter.includes(index)
-      ? [..._filter, index]
-      : _filter.filter((item) => item !== index)
+  const handleMultipleSelect = (image) => {
+    let _formData = { ...formData }
+    let _filter = [..._formData['images'].removeValue]
+    _filter = !_filter.includes(image)
+      ? [..._filter, image]
+      : _filter.filter((item) => item !== image)
 
-    setSelected(_filter)
+    _formData['images'].removeValue = _filter
+    setFormData(_formData)
   }
 
   const handleDelete = () => {
-    console.log('delete')
     let _formData = { ...formData }
-    // console.log(_formData['images'].originalValue)
-    let forDeletion = []
-    selected.forEach((index) => {
-      forDeletion.push(_formData['images'].originalValue[index])
-    })
 
     _formData['images'].originalValue = _formData['images'].originalValue.filter(
-      (item) => !forDeletion.includes(item)
+      (item) => !_formData['images'].removeValue.includes(item)
     )
-
+    _formData['images'].removeValue = []
     setFormData(_formData)
-    setSelected([])
   }
 
   const handleDiscard = () => props.navigate('products')
@@ -274,13 +277,6 @@ function CreateForm(props) {
 
   if (!formData) return null
 
-  let statusOptions = [
-    { label: 'Select a vendor', value: '' },
-    { label: 'Active', value: 'ACTIVE' },
-    { label: 'Draft', value: 'DRAFT' },
-    { label: 'Archived', value: 'ARCHIVED' },
-  ]
-
   let vendorOptions = vendors.map((item) => ({ label: item.name, value: '' + item.id }))
   vendorOptions.unshift({ label: 'Select a vendor', value: null })
   return (
@@ -320,16 +316,6 @@ function CreateForm(props) {
           <LegacyStack distribution="fillEvenly">
             <LegacyStack.Item fill>
               <FormControl
-                {...formData['publish']}
-                onChange={(value) => handleChange('publish', value)}
-              />
-            </LegacyStack.Item>
-            <LegacyStack.Item fill></LegacyStack.Item>
-          </LegacyStack>
-
-          <LegacyStack distribution="fillEvenly">
-            <LegacyStack.Item fill>
-              <FormControl
                 {...formData['vendorId']}
                 onChange={(value) => handleChange('vendorId', value)}
                 options={vendorOptions}
@@ -346,114 +332,26 @@ function CreateForm(props) {
 
           <LegacyStack distribution="fillEvenly">
             <LegacyStack.Item fill>
-              <FormControl
-                {...formData['thumbnail']}
-                onChange={(value) => handleChange('thumbnail', value)}
+              <ShowSingle
+                data={formData['thumbnail']}
+                handleRemove={handleRemove}
+                handleChange={(value) => handleChange('thumbnail', value)}
               />
             </LegacyStack.Item>
             <LegacyStack.Item fill>
-              {formData['thumbnail'].originalValue && (
-                <div style={{ position: 'relative', marginTop: '24px', width: '120px' }}>
-                  <div
-                    style={{
-                      position: 'absolute',
-                      right: '13px',
-                      top: '5px',
-                      height: '10px',
-                      width: '10px',
-                    }}
-                    onClick={handleRemove}
-                  >
-                    <Icon source={CancelMajor} color="critical" backdrop size />
-                  </div>
-                  <img
-                    width="120px"
-                    height="120px"
-                    style={{
-                      objectFit: 'cover',
-                      objectPosition: 'center',
-                      borderRadius: '10px',
-                      border: 'dashed gray',
-                      borderWidth: '1px',
-                    }}
-                    src={formData['thumbnail'].originalValue}
-                  />
-                </div>
-              )}
-            </LegacyStack.Item>
-          </LegacyStack>
-
-          <LegacyStack vertical distribution="fillEvenly">
-            <LegacyStack.Item fill>
               <FormControl
-                {...formData['images']}
-                onChange={(value) => handleChange('images', value)}
+                {...formData['publish']}
+                onChange={(value) => handleChange('publish', value)}
               />
             </LegacyStack.Item>
-            <LegacyStack.Item fill>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  flexWrap: 'wrap',
-                  gap: '10px',
-                  padding: '10px',
-                  borderRadius: '10px',
-                  border: 'dashed gray',
-                  borderWidth: '1px',
-                }}
-              >
-                {formData['images'].originalValue.length > 0 ? (
-                  formData['images'].originalValue.map((image, index) => (
-                    <div
-                      key={index}
-                      style={{ position: 'relative', width: '60px', boxShadow: '1px 1px  #eeeeee' }}
-                    >
-                      <div
-                        id={index}
-                        style={{
-                          position: 'absolute',
-                          right: '10px',
-                          top: '0px',
-                          height: '10px',
-                          width: '10px',
-                        }}
-                      >
-                        <Checkbox
-                          checked={selected.includes(index)}
-                          onChange={() => handleMultipleSelect(index)}
-                        />
-                        {/* <Icon
-                          source={CancelMajor}
-                          color="critical"
-                          backdrop
-                          size
-                          onClick={() => handleRemoveInArray(index)}
-                        /> */}
-                      </div>
-
-                      <img
-                        width="60"
-                        height="60"
-                        style={{
-                          objectFit: 'cover',
-                          objectPosition: 'center',
-                        }}
-                        src={image}
-                      />
-                    </div>
-                  ))
-                ) : (
-                  <p>Empty</p>
-                )}
-              </div>
-            </LegacyStack.Item>
-            {selected.length > 0 && (
-              <LegacyStack.Item>
-                <Button onClick={handleDelete}>Delete</Button>
-              </LegacyStack.Item>
-            )}
           </LegacyStack>
+
+          <ShowMultiple
+            data={formData['images']}
+            handleDelete={handleDelete}
+            handleSelected={handleMultipleSelect}
+            handleChange={(value) => handleChange('images', value)}
+          />
         </LegacyStack>
       </LegacyCard>
 
